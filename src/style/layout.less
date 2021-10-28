@@ -1,0 +1,36 @@
+// 整体布局
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// screen 响应式 < 1240px
+@media screen and(max-width: 1240px) {
+  .app-container {
+    max-width: 100%;
+    margin: 0 20px;
+  }
+}
+
+.flex {
+  display: flex;
+  &.top {
+    align-items: flex-start;
+  }
+  &.end {
+    align-items: flex-end;
+  }
+  &.middle {
+    align-items: center;
+  }
+  &.center {
+    justify-content: center;
+  }
+  &.end {
+    justify-content: flex-end;
+  }
+  &.between {
+    justify-content: space-between;
+  }
+}
