@@ -2,27 +2,28 @@
   <div class="navbar">
     <div class="app-container flex end middle navbar-inner">
       <div>
-        <SearchInput v-model="keywords" placeholder="请输入关键字" />
+        <z-input v-model="keywords" placeholder="请输入关键字" />
       </div>
       <div>
-        <Button>上传图片</Button>
+        <z-button @click="openDialog()">上传图片</z-button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
-import SearchInput from '../SearchInput/index.vue'
+import { defineComponent, inject, ref } from 'vue'
 
 export default defineComponent({
-  components: {
-    SearchInput
-  },
   setup() {
     const keywords = ref<string>('')
+    const openUploadDialog = inject<Function>('openUploadDialog') as Function
+    const openDialog = () => {
+      openUploadDialog()
+    }
     return {
-      keywords
+      keywords,
+      openDialog
     }
   }
 })

@@ -1,5 +1,5 @@
 <template>
-  <input v-model="inputValue" class="input" v-bind="$attrs" />
+  <input v-model="inputValue" class="z-input" v-bind="$attrs" />
 </template>
 
 <script lang="ts">
@@ -27,7 +27,7 @@ export default defineComponent({
 })
 </script>
 <style lang="less" scoped>
-.input {
+.z-input {
   padding: 10px;
   outline: none;
   border: 1px solid var(--gray);

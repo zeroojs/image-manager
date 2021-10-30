@@ -1,26 +1,27 @@
 <template>
   <Navbar />
   <UploadDialog v-model:visible="visible" />
-  <Button @click="visible = true">Open Dialog</Button>
   <router-view class="app-container sub-page" />
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import SearchInput from './components/SearchInput/index.vue'
+import { defineComponent, provide, ref } from 'vue'
 import Navbar from './components/Navbar/index.vue'
 import UploadDialog from './components/UploadDialog/index.vue'
-import Button from './components/Button/index.vue'
 export default defineComponent({
   components: {
     Navbar,
-    SearchInput,
-    UploadDialog,
-    Button
-},
-  data() {
+    UploadDialog
+  },
+  setup() {
+    const visible = ref(false)
+    // 打开上传对话框
+    const openUploadDialog = () => {
+      visible.value = true
+    }
+    provide('openUploadDialog', openUploadDialog)
     return {
-      visible: false
+      visible
     }
   }
 })

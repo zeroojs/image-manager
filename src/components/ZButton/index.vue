@@ -1,12 +1,12 @@
 <template>
   <!-- 时间与属性在vue3中都被归纳到$attrs中了 -->
-  <button v-bind="$attrs" class="btn">
+  <button v-bind="$attrs" class="z-btn">
     <slot></slot>
   </button>
 </template>
 
 <style lang="less" scoped>
-.btn {
+.z-btn {
   padding: 8px 10px;
   outline: none;
   color: var(--white);
@@ -15,6 +15,8 @@
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: .3s ease;
+  min-width: 80px;
+  text-align: center;
   &:hover {
     background-color: var(--light-primary-color);
   }
