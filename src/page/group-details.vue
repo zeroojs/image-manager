@@ -1,12 +1,12 @@
 <template>
   <div class="group-details">
     <div class="group-details__header flex between">
-      <div class="flex end">
+      <div class="flex bottom">
         <h2 class="title">相册名称</h2>
         <span class="edit-btn">编辑</span>
         <span class="del-btn">删除</span>
       </div>
-      <div class="flex end">
+      <div class="flex bottom">
         <p class="image-total-container">
           现有
           <span class="image-total">20</span>
@@ -16,10 +16,10 @@
       </div>
     </div>
     <div class="img-container flex between">
-      <ImageContainer @click="checkImage()"/>
-      <ImageContainer />
-      <ImageContainer />
-      <ImageContainer />
+      <ImageContainer @click="checkImage()" :layout="['select', 'edit', 'del']" />
+      <ImageContainer :layout="['select', 'edit', 'del']" />
+      <ImageContainer :layout="['select', 'edit', 'del']" />
+      <ImageContainer :layout="['select', 'edit', 'del']" />
     </div>
   </div>
 </template>

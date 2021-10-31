@@ -6,7 +6,8 @@
 }
 
 .sub-page {
-  margin-top: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 // screen 响应式 < 1240px
@@ -23,7 +24,7 @@
   &.top {
     align-items: flex-start;
   }
-  &.end {
+  &.bottom {
     align-items: flex-end;
   }
   &.middle {
@@ -37,5 +38,32 @@
   }
   &.between {
     justify-content: space-between;
+  }
+}
+
+.img-layout {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: none;
+  column-gap: 20px;
+  row-gap: 20px;
+  justify-items: center;
+}
+
+@media screen and (max-width: 1065px + 40px) {
+  .img-layout {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media screen and (max-width: 800px + 40px) {
+  .img-layout {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 480px + 40px) {
+  .img-layout {
+    grid-template-columns: repeat(1, 1fr);
   }
 }

@@ -1,10 +1,41 @@
 <template>
   <!-- 时间与属性在vue3中都被归纳到$attrs中了 -->
-  <button v-bind="$attrs" class="z-btn">
+  <button
+    v-bind="$attrs"
+    :class="[
+        'z-btn',
+        { 'is-danger': !isUndefined(danger) },
+        { 'is-disabled': disabled }
+      ]"
+    >
     <slot></slot>
   </button>
 </template>
 
+<script lang="ts">
+import { defineComponent, PropType } from 'vue'
+
+export default defineComponent({
+  props: {
+    danger: {
+      type: (String || undefined) as PropType<string | undefined>,
+      default: undefined
+    },
+    disabled: {
+      type: Boolean
+    }
+  },
+  created() {
+    console.log('danger', typeof this.danger)
+  },
+  methods: {
+    isUndefined(val: string | undefined) {
+      return val === undefined
+    }
+  }
+})
+
+</script>
 <style lang="less" scoped>
 .z-btn {
   padding: 8px 10px;
@@ -23,6 +54,20 @@
   &:active {
     background-color: var(--deep-primary-color);
     transform: scale(.98);
+  }
+  &.is-danger {
+    background-color: var(--red);
+    border-color: var(--red);
+  }
+  &.is-danger:hover {
+    background-color: var(--red-l);
+  }
+  &.is-danger:active {
+    background-color: var(--red-d);
+  }
+  &.is-disabled {
+    cursor: not-allowed;
+    filter: brightness(120%);
   }
 }
 </style>
