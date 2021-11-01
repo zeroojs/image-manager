@@ -22,6 +22,54 @@
         :layout="['select', 'edit', 'del', 'name']"
         @click="checkGroup()"
       />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
+      <ImageContainer
+        :layout="['select', 'edit', 'del', 'name']"
+        @click="checkGroup()"
+      />
     </div>
   </div>
 </template>
