@@ -1,14 +1,8 @@
-import { createApp } from 'vue'
-import { router } from './router'
-import App from './App.vue'
-// 全局注册 Button
-import GlobalComponents from './components'
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
 
-// Style
-import './style/index.less'
-
-const app = createApp(App)
-app
-  .use(router)
-  .use(GlobalComponents)
-  .mount('#app')
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(10086);
+}
+bootstrap();
