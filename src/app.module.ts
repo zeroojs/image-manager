@@ -17,6 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
         "password": "123456",
         "database": "image-manager",
         // "entities": ["../**/**.entity{.ts,.js}"],
+        // 这里有个神坑  记得用__dirname连接
         "entities": [__dirname + '/**/*.entity{.ts,.js}'],
         "synchronize": true
         // "timezone": "local",
