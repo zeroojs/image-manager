@@ -28,6 +28,7 @@
     "@nestjs/typeorm": "^8.0.2",
     "mysql": "^2.18.1",
     "nanoid": "^3.1.30",
+    "qiniu": "^7.4.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "7.4.0",

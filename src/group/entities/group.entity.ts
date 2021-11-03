@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, Timestamp } from 'typeorm';
-import { customAlphabet } from 'nanoid'
-const nanoid = customAlphabet('1234567890abcdef', 10)
+import { Entity, PrimaryGeneratedColumn, Column, Timestamp, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+// import { customAlphabet } from 'nanoid'
+// const nanoid = customAlphabet('1234567890abcdef', 10)
 
 @Entity()
 export class Group {
@@ -11,25 +11,26 @@ export class Group {
   // @Column({
   //   // primary: true,
   //   type: 'varchar',
-  //   default: () => nanoid()
+  //   // default: () => nanoid()
+  //   default: () => 'abc'
   // })
-  // nanoid: string;
+  // // nanoid: string;
+  // nano: string;
 
-  // 分组名称
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true, comment: '分组名称，不可重复' })
   name: string;
 
   // 包含图片数量
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int', default: 0, comment: '包含图片数量' })
   count: number;
 
-  @Column({ type: 'timestamp', default: () => 'current_timestamp' })
+  @CreateDateColumn({
+    type: 'timestamp'
+  })
   createAt: Timestamp;
 
-  @Column({
-    type: 'timestamp',
-    onUpdate: 'current_timestamp',
-    default: () => 'current_timestamp',
+  @UpdateDateColumn({
+    type: 'timestamp'
   })
   updateAt: Timestamp;
 }

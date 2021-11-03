@@ -1,35 +1,46 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { Group } from './entities/group.entity'
+import { queryByListReturn, queryReturn, updateServiceReturn, deleteReturn, createReturn } from '../utils/return.format'
 
 @Injectable()
 export class GroupService {
-  constructor(
-    @InjectRepository(Group)
-    private group: Repository<Group>
-  ) {}
-  create(createGroupDto: CreateGroupDto) {
-    // return 'This action adds a new group';
-    return this.group.save(createGroupDto)
+  constructor(@InjectRepository(Group) private group: Repository<Group>) {}
+  
+  async create(createGroupDto: CreateGroupDto) {
+    // 查重
+    const group = await this.group.findOne({ name: createGroupDto.name })
+    if (group) return createReturn('组名已存在')
+    const newGroup = await this.group.save(createGroupDto)
+    return createReturn<Group>(newGroup)
   }
 
-  findAll() {
-    // return `This action returns all group`;
-    return this.group.find()
+  async findAll() {
+    const total = await this.group.count()
+    const items = await this.group.find()
+    return queryByListReturn<Group[]>(items, total)
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} group`;
+  async findOne(id: number) {
+    // return this.group.findOne({ id })
+    const group = await this.group.findOne({ id })
+    return queryReturn<Group>(group)
   }
 
-  update(id: number, updateGroupDto: UpdateGroupDto) {
-    return `This action updates a #${id} group`;
+  async update(id: number, updateGroupDto: UpdateGroupDto) {
+    const group = await this.findOne(id)
+    if (group.code !== 2000) return updateServiceReturn({ n: 0 })
+    const res = await this.group.update(id, updateGroupDto)
+    return updateServiceReturn(res)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} group`;
+  async remove(id: number) {
+    const { code } = await this.findOne(id)
+    if (code !== 2000) return deleteReturn({ n: 0 })
+    const res = await this.group.delete(id)
+    return deleteReturn(res)
   }
 }
