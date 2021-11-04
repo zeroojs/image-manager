@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, Timestamp, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+import { Image } from 'src/image/entities/image.entity';
+import { Entity, PrimaryGeneratedColumn, Column, Timestamp, UpdateDateColumn, CreateDateColumn, OneToMany } from 'typeorm';
 // import { customAlphabet } from 'nanoid'
 // const nanoid = customAlphabet('1234567890abcdef', 10)
 
@@ -23,6 +24,10 @@ export class Group {
   // 包含图片数量
   @Column({ type: 'int', default: 0, comment: '包含图片数量' })
   count: number;
+
+  // 包含图片
+  @OneToMany(type => Image, image => image.group)
+  images: Image[];
 
   @CreateDateColumn({
     type: 'timestamp'

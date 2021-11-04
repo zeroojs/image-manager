@@ -4,10 +4,12 @@ import { AppService } from './app.service';
 import { GroupModule } from './group/group.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
     GroupModule,
+    ImageModule,
     TypeOrmModule.forRoot(
       {
         "type": "mysql",
@@ -26,7 +28,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
         // "dropSchema": false,
         // "logging": true
       }
-    )
+    ),
   ],
   controllers: [AppController],
   providers: [AppService],
