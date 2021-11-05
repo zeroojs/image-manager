@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
+import { QueryGroupDto } from './dto/query-group.dto';
 
 @Controller('group')
 export class GroupController {
@@ -13,8 +14,8 @@ export class GroupController {
   }
 
   @Get()
-  findAll() {
-    return this.groupService.findAll();
+  findAll(@Query() query: QueryGroupDto) {
+    return this.groupService.findAll(query);
   }
 
   @Get(':id')

@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Group } from 'src/group/entities/group.entity';
 import { getPixelSize } from 'src/utils';
 import { Qiniu } from 'src/utils/qiniu';
 import { deleteReturn, queryByListReturn, queryReturn, updateServiceReturn } from 'src/utils/return.format';
 import { Connection, getConnection, getManager, Repository } from 'typeorm';
 import { CreateImageDto } from './dto/create-image.dto';
+import { QueryImageDto } from './dto/query-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { Image } from './entities/image.entity';
 
@@ -14,7 +16,8 @@ export class ImageService {
   private connection: Connection
 
   constructor(
-    @InjectRepository(Image) private image: Repository<Image>
+    @InjectRepository(Image) private image: Repository<Image>,
+    @InjectRepository(Group) private group: Repository<Group>
   ) {
     this.qiniu = new Qiniu();
     this.connection = getConnection();
@@ -49,11 +52,12 @@ export class ImageService {
     await queryRunner.connect();
     // 开始
     await queryRunner.startTransaction();
-    let delResult = null
+    let dealResult = null
     try {
       // 测试域名(可自定义域名)
       const domain = 'r205lrfmz.hn-bkt.clouddn.com';
       const uploads = await Promise.all(uploadProgress);
+      console.log('上传图片')
       const images: Image[] = uploads.map((item, index) => {
         return {
           filename: filesData[index].filename,
@@ -67,11 +71,17 @@ export class ImageService {
           middle: `http://${domain}/${item.key}/middle`,
           url: `http://${domain}/${item.key}/origin`,
           cloud: item,
+          // group
           groupId: typeof groupId === 'string' ? parseInt(groupId) : groupId
         }
       }) as Image[]
       // delResult = await Promise.all(saves)
-      delResult = await queryRunner.manager.save(Image, images)
+      dealResult = await queryRunner.manager.save(Image, images)
+      console.log('将oos结果整合录入数据库')
+      // 更新分组图片计数
+      const group = await queryRunner.manager.findOne(Group, { id: groupId }, { relations: ['images'] })
+      await queryRunner.manager.update(Group, group.id, { count: group.images.length || 0 })
+      console.log('更新分组图片计数')
     } catch (err) {
       console.log('err', err)
       // 回滚
@@ -80,12 +90,22 @@ export class ImageService {
       // 发布
       await queryRunner.release();
     }
-    return delResult
+    console.log('返回结果')
+    return dealResult
   }
 
-  async findAll() {
+  async findAll(query: QueryImageDto) {
+    const filter = {
+      skip: query.offset || 0,
+      take: query.limit || 10
+    }
     const total = await this.image.count()
-    const items = await this.image.find()
+    // const items = await this.image.find(filter)
+    const items = await this.image
+      .find({
+        relations: ['group'],
+        ...filter
+      })
     return queryByListReturn<Image[]>(items, total)
   }
 
@@ -94,16 +114,20 @@ export class ImageService {
     return queryReturn<Image>(image)
   }
 
+  // 只允许更改分组以及文件名称
   async update(id: number, updateImageDto: UpdateImageDto) {
-    const group = await this.findOne(id)
-    if (group.code !== 2000) return updateServiceReturn({ n: 0 })
+    const { code } = await this.findOne(id)
+    if (code !== 2000) return updateServiceReturn({ n: 0 })
     const res = await this.image.update(id, updateImageDto)
     return updateServiceReturn(res)
   }
 
   async remove(id: number) {
-    const { code } = await this.findOne(id)
+    const { code, data } = await this.findOne(id)
     if (code !== 2000) return deleteReturn({ n: 0 })
+    // 删除七牛云资源
+    await this.qiniu.dropFile(data.cloud.key);
+    // 删除数据库记录
     const res = await this.image.delete(id)
     return deleteReturn(res)
   }

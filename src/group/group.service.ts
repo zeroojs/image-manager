@@ -5,6 +5,7 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { Group } from './entities/group.entity'
 import { queryByListReturn, queryReturn, updateServiceReturn, deleteReturn, createReturn } from '../utils/return.format'
+import { QueryGroupDto } from './dto/query-group.dto';
 
 @Injectable()
 export class GroupService {
@@ -18,9 +19,17 @@ export class GroupService {
     return createReturn<Group>(newGroup)
   }
 
-  async findAll() {
+  async findAll(query: QueryGroupDto) {
+    const filter = {
+      skip: query.offset || 0,
+      take: query.limit || 10
+    }
     const total = await this.group.count()
-    const items = await this.group.find()
+    const items = await this.group
+      .find({
+        // relations: ['images'],
+        ...filter
+      })
     return queryByListReturn<Group[]>(items, total)
   }
 

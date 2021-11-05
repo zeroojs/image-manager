@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, Bind } from '@nestjs/common';
+import { QueryImageDto } from './dto/query-image.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, Bind, Query } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
@@ -24,8 +25,8 @@ export class ImageController {
   }
 
   @Get()
-  findAll() {
-    return this.imageService.findAll();
+  findAll(@Query() query: QueryImageDto) {
+    return this.imageService.findAll(query);
   }
 
   @Get(':id')

@@ -1,5 +1,7 @@
 import { Group } from 'src/group/entities/group.entity';
-import { Entity, PrimaryGeneratedColumn, Column, Timestamp, UpdateDateColumn, CreateDateColumn, ManyToOne, RelationId } from 'typeorm';
+import { QiniuFile } from '../../utils/qiniu'
+import { Entity, PrimaryGeneratedColumn, Column, Timestamp, UpdateDateColumn, CreateDateColumn, ManyToOne, RelationId, JoinColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Image {
@@ -37,12 +39,13 @@ export class Image {
   url: string // auto | 100% 原图
 
   @Column({ nullable: false, type: 'json' })
-  cloud: object // 七牛云文件信息
+  cloud: QiniuFile // 七牛云文件信息
 
   @ManyToOne(type => Group, group => group.images)
+  @JoinColumn({ name: 'groupId' }) // 指定外键
   group: Group
 
-  @RelationId((image: Image) => image.group)
+  @Column({ nullable: false, type: 'int' })
   groupId: number
 
   @CreateDateColumn({

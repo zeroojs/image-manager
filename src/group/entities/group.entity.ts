@@ -21,7 +21,7 @@ export class Group {
   @Column({ type: 'varchar', unique: true, comment: '分组名称，不可重复' })
   name: string;
 
-  // 包含图片数量
+  // 包含图片数量(缓存)
   @Column({ type: 'int', default: 0, comment: '包含图片数量' })
   count: number;
 
