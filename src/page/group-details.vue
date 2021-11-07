@@ -15,38 +15,71 @@
         <z-button @click="openUploadDialog()">上传到相册</z-button>
       </div>
     </div>
-    <div class="img-container flex between">
-      <ImageContainer @click="checkImage()" :layout="['select', 'edit', 'del']" />
-      <ImageContainer :layout="['select', 'edit', 'del']" />
-      <ImageContainer :layout="['select', 'edit', 'del']" />
-      <ImageContainer :layout="['select', 'edit', 'del']" />
+    <div class="img-container img-layout">
+      <ImageContainer
+        v-for="image in imageList"
+        :key="image.id"
+        :src="image.middle"
+        :layout="['select', 'edit', 'del', 'copy']"
+        @click="checkImage(image.id)"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject } from 'vue'
-import { useRouter } from 'vue-router'
+import { defineComponent, inject, ref, reactive } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import ImageContainer from '../components/ImageContainer/index.vue'
+import { queryImageList } from '../api/image'
 
 export default defineComponent({
   components: {
     ImageContainer
   },
   setup() {
-    const router = useRouter()
     const openUploadDialog = inject('openUploadDialog') as Function
-
-    // 查看图片详情
-    const checkImage = () => {
-      router.push('/image/aad')
-    }
+    const { checkImage, imageList } = useImage()
     return {
-      openUploadDialog,
-      checkImage
+      imageList,
+      checkImage,
+      openUploadDialog
     }
   }
 })
+
+function useImage() {
+  const router = useRouter()
+  const route = useRoute()
+  const imageList = ref<ImageModule.Image[]>([])
+  const total = ref(0)
+  const queryParams = reactive({
+    limit: 10,
+    offset: 0,
+    groupId: route.params.id
+  })
+  // 获取图片列表
+  const getImageList = (q = queryParams) => {
+    queryImageList(q).then(({ data }) => {
+      imageList.value = data.items
+      total.value = data.total
+    })
+  }
+  getImageList()
+
+  // 查看图片详情
+  const checkImage = (id: number) => {
+    router.push(`/image/${id}`)
+  }
+
+  return {
+    total,
+    imageList,
+    checkImage,
+    queryParams,
+    getImageList
+  }
+}
 </script>
 
 <style lang="less" scoped>

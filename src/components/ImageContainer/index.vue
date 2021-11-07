@@ -34,11 +34,12 @@
       </div>
     </div>
     <div class="img-body">
-      <img src="../../assets/demo.jpeg" alt="">
+      <img v-if="src" :src="src" alt="">
+      <div v-else class="no-src">{{ name }}</div>
     </div>
     <div v-if="layout.includes('name')" class="image-container-footer flex between bottom">
-      名称名称
-      <span class="image-count">20 张图片</span>
+      {{ name }}
+      <span class="image-count">{{ count }} 张图片</span>
     </div>
   </div>
 </template>
@@ -51,7 +52,13 @@ export default defineComponent({
     layout: {
       type: Array as PropType<string[]>,
       default: () => ['select', 'edit', 'copy', 'del', 'name']
-    }
+    },
+    name: String,
+    count: {
+      type: Number,
+      default: 0
+    },
+    src: String
   },
   emits: ['select', 'edit', 'copy', 'del'],
   setup(props, { emit }) {
@@ -91,6 +98,17 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow: hidden;
+  }
+  .no-src {
+    width: 100%;
+    font-size: 24px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
   }
   .action-group {
     position: absolute;

@@ -1,4 +1,6 @@
 /// <reference types="vite/client" />
+/// <reference path="./types/group.d.ts" />
+/// <reference path="./types/image.d.ts" />
 
 declare module '*.vue' {
   import { DefineComponent } from 'vue'

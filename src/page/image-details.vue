@@ -1,26 +1,35 @@
 <template>
   <div>
     <div class="img-info">
-      <div class="flex">
+      <div v-if="image" class="flex">
         <div class="origin-image-container">
-          <img src="../assets/demo.jpeg" alt="">
+          <img :src="image.url" alt="">
         </div>
         <div class="origin-image-actions">
-          <h1 class="image-title">猫头鹰</h1>
+          <h1 class="image-title">{{ image.filename }}</h1>
           <ul class="link-group">
             <li class="link-item">
-              <a href="http://image-manager.zeroojs.com/kajshduahsdoasd.png?size=thumb">
-                http://image-manager.zeroojs.com/kajshduahsdoasd.png?size=thumb
+              <p>Mini</p>
+              <a :href="image.mini" target="_blank">
+                {{ image.mini }}
               </a>
             </li>
             <li class="link-item">
-              <a href="http://image-manager.zeroojs.com/kajshduahsdoasd.png?size=thumb">
-                http://image-manager.zeroojs.com/kajshduahsdoasd.png?size=thumb
+              <p>缩略图</p>
+              <a :href="image.thumb" target="_blank">
+                {{ image.thumb }}
               </a>
             </li>
             <li class="link-item">
-              <a href="http://image-manager.zeroojs.com/kajshduahsdoasd.png?size=thumb">
-                http://image-manager.zeroojs.com/kajshduahsdoasd.png?size=thumb
+              <p>中等质量</p>
+              <a :href="image.middle" target="_blank">
+                {{ image.middle }}
+              </a>
+            </li>
+            <li class="link-item">
+              <p>原图</p>
+              <a :href="image.url" target="_blank">
+                {{ image.url }}
               </a>
             </li>
           </ul>
@@ -30,7 +39,7 @@
               <div class="radio-group flex">
                 <div class="flex middle">
                   <input type="radio" name="size" />
-                  迷你100*100
+                  迷你 64*64
                 </div>
                 <div class="flex middle">
                   <input type="radio" name="size" />
@@ -54,25 +63,47 @@
           </form>
         </div>
       </div>
-      <div class="origin-image-summary"></div>
+      <div class="origin-image-summary">
+        <p>创建时间：{{ image?.createAt }}</p>
+      </div>
     </div>
     <ImageContainer />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import ImageContainer from '../components/ImageContainer/index.vue'
+import { queryImage } from '../api/image'
 
 export default defineComponent({
   components: {
     ImageContainer
   },
   setup() {
+    const { image } = useImage()
     return {
+      image
     }
   }
 })
+
+function useImage() {
+  const route = useRoute()
+  const image = ref<ImageModule.Image>()
+  // 获取图信息
+  const getImage = (id = route.params.id) => {
+    queryImage(id as string).then(({ data }) => {
+      console.log('data', data)
+      image.value = data
+    })
+  }
+  getImage()
+  return {
+    image
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -106,6 +137,9 @@ export default defineComponent({
     margin-bottom: 20px;
     word-break: break-all;
     list-style-type: none;
+    & > p {
+      margin-bottom: 10px;
+    }
   }
 }
 .download-form {
@@ -126,5 +160,7 @@ export default defineComponent({
 }
 .origin-image-summary {
   margin-top: 40px;
+  margin-bottom: 40px;
+  color: var(--gray-d);
 }
 </style>

@@ -4,7 +4,7 @@
       <div>
         <p class="image-total-container">
           现有
-          <span class="image-total">1</span>
+          <span class="image-total">{{ total }}</span>
           个分组
         </p>
       </div>
@@ -19,86 +19,80 @@
     </div>
     <div class="img-layout">
       <ImageContainer
+        v-for="group in groupList"
+        :key="group.id"
+        :name="group.name"
+        :count="group.count"
+        :src="getGroupBanner(group)"
         :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
-      />
-      <ImageContainer
-        :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup()"
+        @click="checkGroup(group.id)"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ImageContainer from '../components/ImageContainer/index.vue'
+import { queryGroupList } from '../api/group'
 
 export default defineComponent({
   components: {
     ImageContainer
   },
   setup() {
-    const router = useRouter()
     const groupName = ref('')
     const isCreating = ref(false)
+    const { total, groupList, getGroupBanner, checkGroup } = useGroupList()
 
-    // id -> 先模拟生成
-    const checkGroup = (id: string = Math.random().toString(16).substr(2)) => {
-      router.push(`/group/${id}`)
-    }
     return {
-      checkGroup,
+      total,
+      groupList,
       groupName,
-      isCreating
+      checkGroup,
+      isCreating,
+      getGroupBanner
     }
   }
 })
+
+function useGroupList() {
+  const router = useRouter()
+  const groupList = ref<ImageGroupModule.Group[]>([])
+  const total = ref(0)
+  const queryParams = reactive({
+    limit: 10,
+    offset: 0
+  })
+  // 获取分组列表
+  const getGroupList = (q = queryParams) => {
+    queryGroupList(q).then(({ data }) => {
+      groupList.value = data.items
+      total.value = data.total
+    })
+  }
+  getGroupList()
+
+  // 获取分组封面（默认取第一张图片）
+  const getGroupBanner = (group: ImageGroupModule.Group) => {
+    return group.images?.length ? group.images[0].middle : ''
+  }
+
+  // id -> 先模拟生成
+  const checkGroup = (id: number) => {
+    router.push(`/group/${id}`)
+  }
+
+  return {
+    total,
+    groupList,
+    checkGroup,
+    queryParams,
+    getGroupList,
+    getGroupBanner
+  }
+}
 </script>
 
 <style lang="less" scoped>

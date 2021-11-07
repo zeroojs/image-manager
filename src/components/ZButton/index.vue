@@ -25,9 +25,6 @@ export default defineComponent({
       type: Boolean
     }
   },
-  created() {
-    console.log('danger', typeof this.danger)
-  },
   methods: {
     isUndefined(val: string | undefined) {
       return val === undefined
