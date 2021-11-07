@@ -97,9 +97,13 @@ export class ImageService {
   async findAll(query: QueryImageDto) {
     const filter = {
       skip: query.offset || 0,
-      take: query.limit || 10
+      take: query.limit || 10,
+      where: ''
     }
-    const total = await this.image.count()
+    if (query.groupId) {
+      filter.where = `image.groupId = ${query.groupId}`
+    }
+    const total = await this.image.count({ where: filter.where })
     // const items = await this.image.find(filter)
     const items = await this.image
       .find({

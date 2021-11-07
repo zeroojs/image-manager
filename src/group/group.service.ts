@@ -26,10 +26,17 @@ export class GroupService {
     }
     const total = await this.group.count()
     const items = await this.group
-      .find({
-        // relations: ['images'],
-        ...filter
-      })
+      // .find({
+      //   // relations: ['images'],
+      //   ...filter
+      // })
+      .createQueryBuilder('group')
+      .leftJoin('group.images', 'images')
+      .select(['group'])
+      .addSelect(['images.thumb', 'images.middle'])
+      .offset(filter.skip)
+      .limit(filter.take)
+      .getMany()
     return queryByListReturn<Group[]>(items, total)
   }
 
