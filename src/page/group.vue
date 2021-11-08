@@ -20,7 +20,7 @@
     <div class="img-layout">
       <ImageContainer
         v-for="group in groupList"
-        :key="group.id"
+      :key="group.id"
         :name="group.name"
         :count="group.count"
         :src="getGroupBanner(group)"
@@ -32,10 +32,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue'
+import { defineComponent, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ImageContainer from '../components/ImageContainer/index.vue'
 import { queryGroupList } from '../api/group'
+import { useStore } from '../store'
 
 export default defineComponent({
   components: {
@@ -45,6 +46,11 @@ export default defineComponent({
     const groupName = ref('')
     const isCreating = ref(false)
     const { total, groupList, getGroupBanner, checkGroup } = useGroupList()
+    const store = useStore()
+
+    watch(() => groupList.value, (currentVal) => {
+      store.actions.SET_GROUPS(currentVal)
+    })
 
     return {
       total,

@@ -40,11 +40,18 @@
             <label class="form-item">
               <p>选择分组</p>
               <div class="flex">
-                <z-input v-model="group" placeholder="请选择分组" />
+                <z-select v-model="groupId" placeholder="请选择分组">
+                  <z-option
+                    v-for="group in groups"
+                    :key="group.id"
+                    :value="group.id"
+                    :label="group.name"
+                  />
+                </z-select>
               </div>
             </label>
             <label class="form-item action flex center">
-              <z-button>上传</z-button>
+              <z-button @click.prevent="handleUploadImages()">上传</z-button>
               <z-button>添加分组</z-button>
             </label>
           </form>
@@ -64,45 +71,65 @@
 
 <script lang="ts">
 import { defineComponent, onBeforeUnmount, ref, SetupContext, watch } from 'vue'
+import { queryGroupList } from '../../api/group'
+import { uploadImages } from '../../api/image'
+import { useStore } from '../../store'
+import ZSelect from '../MSelect/index.vue'
+import ZOption from '../MSelect/Option.vue'
 
 export default defineComponent({
-    props: {
-        visible: Boolean
-    },
-    emits: ["update:visible"],
-    setup(props, ctx) {
-        const { dualogVisible, isShow, handleClose, handleShow } = useDialog(ctx)
-        watch(() => props.visible, (currentValue) => {
-            if (currentValue) {
-                handleShow();
-            }
-            else {
-                handleClose();
-            }
-        });
-        const {
-          fileInput,
-          fileDatas,
-          removeFile,
-          handleDropOver,
-          handleCopy,
-          handleFileInputChange,
-          openFilesDialog
-        } = useFiles()
-        return {
-          isShow,
-          dualogVisible,
-          group: ref(''),
-          handleClose,
-          fileInput,
-          fileDatas,
-          removeFile,
-          handleCopy,
-          handleDropOver,
-          openFilesDialog,
-          handleFileInputChange
-        };
+  components: {
+    ZSelect,
+    ZOption
+  },
+  props: {
+      visible: Boolean
+  },
+  emits: ["update:visible"],
+  setup(props, ctx) {
+    const { dualogVisible, isShow, handleClose, handleShow } = useDialog(ctx)
+    const { groups, groupId } = useGroup()
+    const {
+      fileInput,
+      fileDatas,
+      removeFile,
+      handleDropOver,
+      handleCopy,
+      handleFileInputChange,
+      openFilesDialog
+    } = useFiles()
+
+    // 上传图片
+    const handleUploadImages = async () => {
+      const files = fileDatas.value.map(fd => fd.data as File)
+      await uploadImages(files, groupId.value)
+      handleClose()
     }
+
+    watch(() => props.visible, (currentValue) => {
+        if (currentValue) {
+          handleShow()
+        }else {
+          handleClose()
+        }
+    })
+
+    return {
+      isShow,
+      groups,
+      dualogVisible,
+      groupId,
+      handleClose,
+      fileInput,
+      fileDatas,
+      removeFile,
+      handleCopy,
+      handleDropOver,
+      openFilesDialog,
+      handleUploadImages,
+      handleFileInputChange
+    }
+  }
 })
 
 // 弹窗行为hook
@@ -137,6 +164,32 @@ function useDialog(ctx: SetupContext<'update:visible'[]>) {
     isShow,
     handleClose,
     handleShow
+  }
+}
+
+// 分组hook
+function useGroup() {
+  const groupId = ref<number | string>('')
+  const store = useStore()
+  const groups = ref(store.state.groups)
+
+  // 获取分组列表
+  const getGroupList = (q = { limit: 10, offset: 0 }) => {
+    queryGroupList(q).then(({ data }) => {
+      if (data.items.length) {
+        groups.value = data.items
+        groupId.value = data.items[0].id
+      }
+    })
+  }
+  if (groups.value.length) {
+    groupId.value = groups.value[0].id
+  } else {
+    getGroupList()
+  }
+  return {
+    groupId,
+    groups
   }
 }
 

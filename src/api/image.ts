@@ -9,3 +9,20 @@ export const queryImageList = (query = { limit: 10, offset: 0 }) => {
 export const queryImage = (id: string | number) => {
   return request.get(`/image/${id}`)
 }
+
+// 上传图片
+export const uploadImages = (files: File[], groupId: string | number) => {
+  // 组装表单
+  const form = new FormData()
+  files.forEach((file, index) => {
+    form.append('files', file, file.name)
+  })
+  
+  form.append('groupId', groupId as string)
+  
+  return request.post('/image', form, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
