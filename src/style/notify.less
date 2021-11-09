@@ -1,0 +1,11 @@
+.Loop(@index) when(@index<100){
+  .notify-container:nth-child(@{index}) .notify {
+    transform: translateY((@index - 3) * (100% + 10px)) !important;
+  }
+
+  //递归调用 达到循环目的
+  .Loop(@index+1);
+}
+body {
+  .Loop(0)
+}

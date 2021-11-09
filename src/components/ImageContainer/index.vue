@@ -21,7 +21,7 @@
       <div
         v-if="layout.includes('copy')"
         class="action-item flex center middle"
-        @click="$emit('copy')"
+        @click="(e) => $emit('copy', e)"
       >
           <i class="iconfont icon-copy"></i>
         </div>
@@ -98,6 +98,9 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .no-src {
     width: 100%;

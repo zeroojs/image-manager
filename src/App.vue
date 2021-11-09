@@ -7,8 +7,8 @@
 <script lang="ts">
 import { defineComponent, provide, ref } from 'vue'
 import Navbar from './components/Navbar/index.vue'
-import Footer from './components/Footer/index.vue'
 import UploadDialog from './components/UploadDialog/index.vue'
+
 export default defineComponent({
   components: {
     Navbar,

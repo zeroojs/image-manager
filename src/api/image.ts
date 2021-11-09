@@ -26,3 +26,8 @@ export const uploadImages = (files: File[], groupId: string | number) => {
     }
   })
 }
+
+// 删除照片
+export const deleteImage = (id: number) => {
+  return request.delete(`/image/${id}`)
+}

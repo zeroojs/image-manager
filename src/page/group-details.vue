@@ -2,14 +2,14 @@
   <div class="group-details">
     <div class="group-details__header flex between">
       <div class="flex bottom">
-        <h2 class="title">相册名称</h2>
+        <h2 class="title">{{ group.name }}</h2>
         <span class="edit-btn">编辑</span>
         <span class="del-btn">删除</span>
       </div>
       <div class="flex bottom">
         <p class="image-total-container">
           现有
-          <span class="image-total">20</span>
+          <span class="image-total">{{ total }}</span>
           张照片
         </p>
         <z-button @click="openUploadDialog()">上传到相册</z-button>
@@ -20,8 +20,10 @@
         v-for="image in imageList"
         :key="image.id"
         :src="image.middle"
-        :layout="['select', 'edit', 'del', 'copy']"
-        @click="checkImage(image.id)"
+        :layout="['select', 'del', 'copy']"
+        @click.self="checkImage(image.id)"
+        @copy="(e) => handleClipboard(image.middle, e)"
+        @del="delImage(image.id)"
       />
     </div>
   </div>
@@ -31,7 +33,8 @@
 import { defineComponent, inject, ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ImageContainer from '../components/ImageContainer/index.vue'
-import { queryImageList } from '../api/image'
+import { queryImageList, deleteImage } from '../api/image'
+import { handleClipboard } from '../utils/clipboard'
 
 export default defineComponent({
   components: {
@@ -39,14 +42,31 @@ export default defineComponent({
   },
   setup() {
     const openUploadDialog = inject('openUploadDialog') as Function
-    const { checkImage, imageList } = useImage()
+    const { checkImage, imageList, delImage, total } = useImage()
+    const { group } = useGroup()
     return {
+      group,
+      total,
+      delImage,
       imageList,
       checkImage,
-      openUploadDialog
+      openUploadDialog,
+      handleClipboard
     }
   }
 })
+
+function useGroup() {
+  const route = useRoute()
+  const group = reactive<ImageGroupModule.Group>({
+    id: parseInt(route.params.id as string),
+    name: route.query.name as string,
+    count: parseInt(route.query.count as string)
+  })
+  return {
+    group
+  }
+}
 
 function useImage() {
   const router = useRouter()
@@ -67,6 +87,13 @@ function useImage() {
   }
   getImageList()
 
+  // 删除照片
+  const delImage = async (id: number) => {
+    await deleteImage(id)
+    imageList.value = imageList.value.filter(item => item.id !== id)
+    total.value -= 1
+  }
+
   // 查看图片详情
   const checkImage = (id: number) => {
     router.push(`/image/${id}`)
@@ -74,6 +101,7 @@ function useImage() {
 
   return {
     total,
+    delImage,
     imageList,
     checkImage,
     queryParams,

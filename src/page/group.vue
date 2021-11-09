@@ -20,12 +20,13 @@
     <div class="img-layout">
       <ImageContainer
         v-for="group in groupList"
-      :key="group.id"
+        :key="group.id"
         :name="group.name"
         :count="group.count"
         :src="getGroupBanner(group)"
         :layout="['select', 'edit', 'del', 'name']"
-        @click="checkGroup(group.id)"
+        @click="checkGroup(group)"
+        @del.prevent="() => ({})"
       />
     </div>
   </div>
@@ -86,8 +87,12 @@ function useGroupList() {
   }
 
   // id -> 先模拟生成
-  const checkGroup = (id: number) => {
-    router.push(`/group/${id}`)
+  const checkGroup = (group: ImageGroupModule.Group) => {
+    const { id, name, count } = group
+    router.push({
+      path: `/group/${id}`,
+      query: { name, count }
+    })
   }
 
   return {
