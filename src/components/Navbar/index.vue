@@ -1,9 +1,9 @@
 <template>
   <div class="navbar">
     <div class="app-container flex end middle navbar-inner">
-      <div>
+      <!-- <div>
         <z-input v-model="keywords" placeholder="请输入关键字" />
-      </div>
+      </div> -->
       <div>
         <z-button @click="openDialog()">上传图片</z-button>
       </div>

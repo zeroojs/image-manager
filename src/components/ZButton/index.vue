@@ -5,7 +5,8 @@
     :class="[
         'z-btn',
         { 'is-danger': !isUndefined(danger) },
-        { 'is-disabled': disabled }
+        { 'is-disabled': disabled },
+        { 'is-plain': !isUndefined(plain) }
       ]"
     >
     <slot></slot>
@@ -17,6 +18,10 @@ import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   props: {
+    plain: {
+      type: (String || undefined) as PropType<string | undefined>,
+      default: undefined
+    },
     danger: {
       type: (String || undefined) as PropType<string | undefined>,
       default: undefined
@@ -61,6 +66,10 @@ export default defineComponent({
   }
   &.is-danger:active {
     background-color: var(--red-d);
+  }
+  &.is-plain {
+    color: var(--primary-color);
+    background-color: transparent;
   }
   &.is-disabled {
     cursor: not-allowed;

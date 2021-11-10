@@ -19,6 +19,9 @@ export default defineComponent({
     watch(() => inputValue.value, (currentValue) => {
       ctx.emit('update:modelValue', currentValue)
     })
+    watch(() => props.modelValue, (currentValue) => {
+      inputValue.value = currentValue
+    })
 
     return {
       inputValue

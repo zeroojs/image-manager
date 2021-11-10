@@ -1,3 +1,4 @@
+import { useNotify } from './../components/Notify/index';
 import axios, { AxiosInstance, AxiosRequestConfig, Canceler, CancelTokenStatic } from 'axios'
 
 const CancelToken: CancelTokenStatic = axios.CancelToken
@@ -49,22 +50,20 @@ request.interceptors.response.use(
   response => {
     const { status } = response
     if (status === 500) {
-      alert({
-        type: 'error',
+      const notify = useNotify()
+      notify({
         title: '错误提示',
         message: '服务器内部错误',
-        duration: 5000
       })
     }
     return response.data
   },
   error => {
     // console.log('error', error.statusCode)
-    alert({
-      type: 'error',
+    const notify = useNotify()
+    notify({
       title: '错误提示',
-      message: error.message,
-      duration: 5000
+      message: error.message
     })
   }
 )

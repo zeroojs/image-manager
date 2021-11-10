@@ -1,6 +1,6 @@
 declare module ImageGroupModule {
   export interface Group {
-    id: number
+    id?: number
     name: string
     count?: number
     images?: ImageModule.Image[]

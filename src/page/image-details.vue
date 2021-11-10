@@ -56,7 +56,7 @@
               </div>
             </label>
             <label class="form-item flex btn-group">
-              <z-button>下载图片</z-button>
+              <z-button @click.prevent="downloadImg(image)">下载图片</z-button>
               <z-button>全尺寸下载</z-button>
               <z-button>复制外链</z-button>
             </label>
@@ -76,6 +76,7 @@ import { defineComponent, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import ImageContainer from '../components/ImageContainer/index.vue'
 import { queryImage } from '../api/image'
+import { downloadImg } from '../utils/download'
 
 export default defineComponent({
   components: {
@@ -84,7 +85,8 @@ export default defineComponent({
   setup() {
     const { image } = useImage()
     return {
-      image
+      image,
+      downloadImg
     }
   }
 })

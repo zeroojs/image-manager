@@ -52,7 +52,7 @@
             </label>
             <label class="form-item action flex center">
               <z-button @click.prevent="handleUploadImages()">上传</z-button>
-              <z-button>添加分组</z-button>
+              <!-- <z-button>添加分组</z-button> -->
             </label>
           </form>
         </template>
@@ -71,6 +71,7 @@
 
 <script lang="ts">
 import { defineComponent, onBeforeUnmount, ref, SetupContext, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { queryGroupList } from '../../api/group'
 import { uploadImages } from '../../api/image'
 import { useStore } from '../../store'
@@ -83,7 +84,7 @@ export default defineComponent({
     ZOption
   },
   props: {
-      visible: Boolean
+    visible: Boolean
   },
   emits: ["update:visible"],
   setup(props, ctx) {
@@ -106,12 +107,15 @@ export default defineComponent({
       handleClose()
     }
 
+    const route = useRoute()
     watch(() => props.visible, (currentValue) => {
-        if (currentValue) {
-          handleShow()
-        }else {
-          handleClose()
-        }
+      if (currentValue) {
+        handleShow()
+        if (!route.params.id) return
+        groupId.value = parseInt(route.params.id as string)
+      }else {
+        handleClose()
+      }
     })
 
     return {
@@ -172,6 +176,7 @@ function useGroup() {
   const groupId = ref<number | string>('')
   const store = useStore()
   const groups = ref(store.state.groups)
+  const group = ref<ImageGroupModule.Group>()
 
   // 获取分组列表
   const getGroupList = (q = { limit: 10, offset: 0 }) => {
@@ -183,13 +188,16 @@ function useGroup() {
     })
   }
   if (groups.value.length) {
-    groupId.value = groups.value[0].id
+    if (!groupId.value) {
+      groupId.value = groups.value[0].id as number
+    }
   } else {
     getGroupList()
   }
   return {
-    groupId,
-    groups
+    group,
+    groups,
+    groupId
   }
 }
 

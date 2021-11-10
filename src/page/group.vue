@@ -9,10 +9,10 @@
         </p>
       </div>
       <div class="flex">
-        <z-button :disabled="false" danger>批量删除</z-button>
+        <!-- <z-button :disabled="false" danger>批量删除</z-button> -->
         <div v-if="isCreating" class="flex create-group">
-          <z-input v-model="groupName" placeholder="请输入分组名称" />
-          <z-button @click="isCreating = false">保存</z-button>
+          <z-input v-model="group.name" placeholder="请输入分组名称" />
+          <z-button @click="createGroup()">保存</z-button>
         </div>
         <z-button v-else @click="isCreating = true">创建分组</z-button>
       </div>
@@ -26,17 +26,17 @@
         :src="getGroupBanner(group)"
         :layout="['select', 'edit', 'del', 'name']"
         @click="checkGroup(group)"
-        @del.prevent="() => ({})"
+        @del="delGroup(group)"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, watch } from 'vue'
+import { defineComponent, reactive, Ref, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ImageContainer from '../components/ImageContainer/index.vue'
-import { queryGroupList } from '../api/group'
+import { groupRestful } from '../api/group'
 import { useStore } from '../store'
 
 export default defineComponent({
@@ -44,9 +44,8 @@ export default defineComponent({
     ImageContainer
   },
   setup() {
-    const groupName = ref('')
     const isCreating = ref(false)
-    const { total, groupList, getGroupBanner, checkGroup } = useGroupList()
+    const { group, total, groupList, getGroupBanner, checkGroup, createGroup, delGroup } = useGroupList(isCreating)
     const store = useStore()
 
     watch(() => groupList.value, (currentVal) => {
@@ -55,38 +54,66 @@ export default defineComponent({
 
     return {
       total,
+      group,
+      delGroup,
       groupList,
-      groupName,
       checkGroup,
       isCreating,
+      createGroup,
       getGroupBanner
     }
   }
 })
 
-function useGroupList() {
+function useGroupList(isCreating: Ref<boolean>) {
   const router = useRouter()
   const groupList = ref<ImageGroupModule.Group[]>([])
   const total = ref(0)
+  const group = reactive({
+    name: ''
+  })
   const queryParams = reactive({
     limit: 10,
     offset: 0
   })
   // 获取分组列表
   const getGroupList = (q = queryParams) => {
-    queryGroupList(q).then(({ data }) => {
+    groupRestful('GET', q).then(({ data }) => {
       groupList.value = data.items
       total.value = data.total
     })
   }
   getGroupList()
 
+  // 创建分组
+  const createGroup = async () => {
+    if (!group.name) {
+      isCreating.value = false
+      return
+    }
+    const result = await groupRestful('POST', group)
+    if (result) {
+      groupList.value.unshift(result.data)
+      total.value += 1
+      isCreating.value = false
+    }
+  }
+
+  // 删除分组
+  const delGroup = async (group: ImageGroupModule.Group) => {
+    const result = await groupRestful('DEL', group)
+    if (result) {
+      groupList.value = groupList.value.filter(item => item.id !== group.id)
+      total.value -= 1
+    }
+  }
+
   // 获取分组封面（默认取第一张图片）
   const getGroupBanner = (group: ImageGroupModule.Group) => {
     return group.images?.length ? group.images[0].middle : ''
   }
 
-  // id -> 先模拟生成
+  // 前往分组详情
   const checkGroup = (group: ImageGroupModule.Group) => {
     const { id, name, count } = group
     router.push({
@@ -97,9 +124,12 @@ function useGroupList() {
 
   return {
     total,
+    group,
+    delGroup,
     groupList,
     checkGroup,
     queryParams,
+    createGroup,
     getGroupList,
     getGroupBanner
   }
