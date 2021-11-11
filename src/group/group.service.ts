@@ -1,15 +1,21 @@
+import { Image } from './../image/entities/image.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Connection, getConnection, } from 'typeorm';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { Group } from './entities/group.entity'
 import { queryByListReturn, queryReturn, updateServiceReturn, deleteReturn, createReturn } from '../utils/return.format'
 import { QueryGroupDto } from './dto/query-group.dto';
-
+import { Qiniu } from 'src/utils/qiniu';
 @Injectable()
 export class GroupService {
-  constructor(@InjectRepository(Group) private group: Repository<Group>) {}
+  private qiniu: Qiniu
+  private connection: Connection
+  constructor(@InjectRepository(Group) private group: Repository<Group>) {
+    this.qiniu = new Qiniu();
+    this.connection = getConnection();
+  }
   
   async create(createGroupDto: CreateGroupDto) {
     // 查重
@@ -36,6 +42,7 @@ export class GroupService {
       .addSelect(['images.thumb', 'images.middle'])
       .offset(filter.skip)
       .limit(filter.take)
+      .orderBy('group.id', 'DESC')
       .getMany()
     return queryByListReturn<Group[]>(items, total)
   }
@@ -54,9 +61,47 @@ export class GroupService {
   }
 
   async remove(id: number) {
-    const { code } = await this.findOne(id)
-    if (code !== 2000) return deleteReturn({ n: 0 })
-    const res = await this.group.delete(id)
-    return deleteReturn(res)
+    const group = await this.group.findOne({ id }, {
+      relations: ['images']
+    })
+    if (!group) return deleteReturn({ n: 0 })
+    // 删除分组中的图片
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    // 开始
+    await queryRunner.startTransaction();
+    let dealResult = null
+    console.log('data.images', group.images)
+    try {
+      if (group.images && group.images.length) {
+        const delActions = group.images.map(async image => {
+          console.log('image.id', image)
+          // 删除七牛云资源
+          if (image.cloud) {
+            const res = await this.qiniu.dropFile(image.cloud.key)
+            console.log('七牛云资源已删除', res)
+          }
+          return queryRunner.manager.delete(Image, image.id)
+        })
+        // 删除分组中的图片
+        await Promise.all(delActions)
+        console.log('分组中的图片已删除')
+      }
+      // 删除分组
+      dealResult = await queryRunner.manager.delete(Group, id)
+      // dealResult = await this.group.delete(id)
+      console.log('dealResult', dealResult)
+      console.log('分组已删除')
+    } catch (err) {
+      console.log('err', err)
+      // 回滚
+      await queryRunner.rollbackTransaction();
+    } finally {
+      // 发布
+      await queryRunner.release();
+    }
+    console.log('dealResult', dealResult)
+    console.log('返回结果')
+    return deleteReturn(dealResult)
   }
 }

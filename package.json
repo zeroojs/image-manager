@@ -12,13 +12,14 @@
     "start": "nest start",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "start:pm2": "pm2 start npm --name img-mg-3003 -- run start:prod"
   },
   "dependencies": {
     "@nestjs/common": "^7.6.15",
@@ -26,8 +27,10 @@
     "@nestjs/mapped-types": "^1.0.0",
     "@nestjs/platform-express": "^7.6.15",
     "@nestjs/typeorm": "^8.0.2",
+    "axios": "^0.24.0",
     "class-transformer": "^0.4.0",
     "image-size": "^1.0.0",
+    "jszip": "^3.7.1",
     "mysql": "^2.18.1",
     "nanoid": "^3.1.30",
     "qiniu": "^7.4.0",

@@ -9,11 +9,17 @@ import { CreateImageDto } from './dto/create-image.dto';
 import { QueryImageDto } from './dto/query-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { Image } from './entities/image.entity';
+import axios from 'axios'
+import { writeFileSync } from 'fs'
+import { resolve } from 'path'
 
+// import Jszip from 'jszip'
+const Jszip = require('jszip')
 @Injectable()
 export class ImageService {
   private qiniu: Qiniu
   private connection: Connection
+  private zip: any
 
   constructor(
     @InjectRepository(Image) private image: Repository<Image>,
@@ -21,6 +27,7 @@ export class ImageService {
   ) {
     this.qiniu = new Qiniu();
     this.connection = getConnection();
+    this.zip = new Jszip()
   }
   async create(createImageDto: CreateImageDto) {
     const filesData = [];
@@ -101,7 +108,8 @@ export class ImageService {
       where: ''
     }
     if (query.groupId) {
-      filter.where = `image.groupId = ${query.groupId}`
+      // filter.where = `image.groupId = ${query.groupId}`
+      filter.where = `groupId = ${query.groupId}`
     }
     const total = await this.image.count({ where: filter.where })
     // const items = await this.image.find(filter)
@@ -130,9 +138,88 @@ export class ImageService {
     const { code, data } = await this.findOne(id)
     if (code !== 2000) return deleteReturn({ n: 0 })
     // 删除七牛云资源
-    await this.qiniu.dropFile(data.cloud.key);
+    await this.qiniu.dropFile(data.cloud.key)
+    const group = await this.group.findOne({ id: data.groupId })
+    await this.group.update(group.id, { count: group.count - 1 })
     // 删除数据库记录
     const res = await this.image.delete(id)
     return deleteReturn(res)
+  }
+
+  // 批量删除
+  async batchRemove(id: number[]) {
+    // 创建事物
+    const runner = this.connection.createQueryRunner()
+    await runner.connect()
+    // 开始
+    await runner.startTransaction()
+    let dealResult = null
+    try {
+      dealResult = await Promise.all(id.map(async id => {
+        const image = await runner.manager.findOne(Image, { id })
+        console.log('image', image)
+        if (!image) {
+          console.log('没有此集合 -- ', id)
+        }
+        if (image) {
+          // 删除七牛云资源
+          await this.qiniu.dropFile(image.cloud.key)
+          // 更新组
+          const group = await runner.manager.findOne(Group, { id: image.groupId })
+          await runner.manager.update(Group, group.id,  { count: group.count - 1 })
+          // 删除数据库记录
+          // const res = await this.image.delete(id)
+          const res = await runner.manager.delete(Image, id)
+          return deleteReturn(res)
+        }
+      }))
+    } catch (err) {
+      console.log(err)
+      // 异常回滚
+      await runner.rollbackTransaction()
+    } finally {
+      // 发布事务
+      await runner.release()
+    }
+    console.log('dealResult', dealResult)
+    dealResult = dealResult ? deleteReturn({ n: 0 }) : deleteReturn({ affected: 1, raw: {} })
+    console.log('dealResult', dealResult)
+    return dealResult
+  }
+
+  // 下载图片
+  async download(id: number, size = 'mini') {
+    const { data: image } = await this.findOne(id)
+    // 打包
+    if (size === 'all') {
+      const filename = image.filename
+      // mini
+      const miniResult = await axios.get(image.mini, { responseType: 'arraybuffer' })
+      const miniFolder = this.zip.folder('mini')
+      miniFolder.file(filename, miniResult.data)
+      // small
+      const smallResult = await axios.get(image.thumb, { responseType: 'arraybuffer' })
+      const smallFolder = this.zip.folder('small')
+      smallFolder.file(filename, smallResult.data)
+      // middle
+      const middleResult = await axios.get(image.middle, { responseType: 'arraybuffer' })
+      const middleFolder = this.zip.folder('middle')
+      middleFolder.file(filename, middleResult.data)
+      // origin
+      const originResult = await axios.get(image.url, { responseType: 'arraybuffer' })
+      const originFolder = this.zip.folder('origin')
+      originFolder.file(filename, originResult.data)
+      const pack = await this.zip.generateAsync({ type: 'nodebuffer' })
+      return pack
+    }
+    const url = {
+      mini: image.mini,
+      small: image.thumb,
+      middle: image.middle,
+      origin: image.url,
+    }[size]
+    // 单独下载
+    const result = await axios.get(url, { responseType: 'arraybuffer' })
+    return result.data
   }
 }

@@ -110,6 +110,9 @@ export const deleteReturn = (reason: DeleteResult | { n: number }): ActionRespon
       code = 2000
     }
   } else {
+    if (!reason) {
+      return { code: 500, message: '服务器内部错误' }
+    }
     if (reason.n < 1) {
       message = '没有此集合'
       code = 3000

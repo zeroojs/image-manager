@@ -1,9 +1,10 @@
 import { QueryImageDto } from './dto/query-image.dto';
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, Bind, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, Bind, Query, Res } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express'
 
 @Controller('image')
 export class ImageController {
@@ -39,8 +40,24 @@ export class ImageController {
     return this.imageService.update(+id, updateImageDto);
   }
 
+  @Delete()
+  batchRemove(@Body() body: { ids: string[] }) {
+    if (body.ids.length === 1) return this.imageService.remove(+body.ids[0])
+    return this.imageService.batchRemove(body.ids.map(id => parseInt(id)))
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.imageService.remove(+id);
+  }
+
+  // 下载
+  @Post('/download')
+  async download(@Body() body: { id: number, size: string }, @Res() res: Response) {
+    const data = await this.imageService.download(body.id, body.size)
+    console.log('data', data)
+    res.
+      status(200)
+      .send(data)
   }
 }
