@@ -36,29 +36,17 @@
           <form class="download-form">
             <label class="form-item">
               <p>品质选择</p>
-              <div class="radio-group flex">
-                <div class="flex middle">
-                  <input type="radio" name="size" />
-                  迷你 64*64
-                </div>
-                <div class="flex middle">
-                  <input type="radio" name="size" />
-                  较差
-                </div>
-                <div class="flex middle">
-                  <input type="radio" name="size" />
-                  中等
-                </div>
-                <div class="flex middle">
-                  <input type="radio" name="size" />
-                  原图
-                </div>
-              </div>
+              <RadioGroup v-model="size">
+                <Radio value="mini">迷你 64*64</Radio>
+                <Radio value="small">较差</Radio>
+                <Radio value="middle">中等</Radio>
+                <Radio value="origin">原图</Radio>
+              </RadioGroup>
             </label>
             <label class="form-item flex btn-group">
-              <z-button @click.prevent="downloadImg(image)">下载图片</z-button>
-              <z-button>全尺寸下载</z-button>
-              <z-button>复制外链</z-button>
+              <z-button @click.prevent="downloadImage()">下载图片</z-button>
+              <z-button @click.prevent="downloadImage(true)">全尺寸下载</z-button>
+              <z-button @click.prevent="clipboard">复制外链</z-button>
             </label>
           </form>
         </div>
@@ -67,32 +55,43 @@
         <p>创建时间：{{ image?.createAt }}</p>
       </div>
     </div>
-    <ImageContainer />
+    <!-- <ImageContainer /> -->
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import ImageContainer from '../components/ImageContainer/index.vue'
-import { queryImage } from '../api/image'
-import { downloadImg } from '../utils/download'
+import { queryImage, downloadImageAction } from '../api/image'
+// import { downloadImg } from '../utils/download'
+// import ImageContainer from '../components/ImageContainer/index.vue'
+import Radio from '../components/Radio/index.vue'
+import RadioGroup from '../components/Radio/RadioGroup.vue'
+import { saveAs } from 'file-saver'
+import { handleClipboard } from '../utils/clipboard'
 
 export default defineComponent({
   components: {
-    ImageContainer
+    Radio,
+    RadioGroup
+    // ImageContainer
   },
   setup() {
-    const { image } = useImage()
+    const { image, size, downloadImage, clipboard } = useImage()
+
     return {
+      size,
       image,
-      downloadImg
-    }
+      clipboard,
+      downloadImage
+      // downloadImg
+  }
   }
 })
 
 function useImage() {
   const route = useRoute()
+  const size = ref('mini')
   const image = ref<ImageModule.Image>()
   // 获取图信息
   const getImage = (id = route.params.id) => {
@@ -102,8 +101,37 @@ function useImage() {
     })
   }
   getImage()
+
+  // 下载图片
+  const downloadImage = async (isAll = false) => {
+    if (!image.value) return
+    const file = await downloadImageAction(image.value.id, isAll ? 'all' : size.value)
+    let type = image.value.mime
+    let filename = image.value.filename
+    if (isAll) {
+      type = 'application/zip'
+      filename = image.value.filename.replace(image.value.ext, 'zip')
+    }
+    saveAs(new Blob([file], { type }), filename)
+  }
+
+  // 复制外链
+  const clipboard = (e: Event) => {
+    const currenImage = image.value
+    if (!currenImage) return
+    const url = {
+      mini: currenImage.mini,
+      small: currenImage.thumb,
+      middle: currenImage.middle,
+      origin: currenImage.url,
+    }[size.value]
+    handleClipboard(url || '', e)
+  }
   return {
-    image
+    size,
+    image,
+    clipboard,
+    downloadImage
   }
 }
 </script>

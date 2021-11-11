@@ -87,7 +87,7 @@ function useSolt(ctx: SetupContext<any>) {
   const solts = ctx.slots as any
   const childProps: { value: string, label: string }[] = []
   if (solts.default) {
-    (solts.default() as any)[0].children.forEach((item) => {
+    ((solts.default() as any)[0].children as any[]).forEach((item) => {
       childProps.push(item.props)
     })
   }

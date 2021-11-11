@@ -8,10 +8,14 @@
 import { defineComponent, provide, ref } from 'vue'
 import Navbar from './components/Navbar/index.vue'
 import UploadDialog from './components/UploadDialog/index.vue'
+import Radio from './components/Radio/index.vue'
+import RadioGroup from './components/Radio/RadioGroup.vue'
 
 export default defineComponent({
   components: {
     Navbar,
+    Radio,
+    RadioGroup,
     UploadDialog
   },
   setup() {

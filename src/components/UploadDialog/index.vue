@@ -99,15 +99,21 @@ export default defineComponent({
       handleFileInputChange,
       openFilesDialog
     } = useFiles()
+    const store = useStore()
+    const route = useRoute()
 
     // 上传图片
     const handleUploadImages = async () => {
+      store.actions.SET_IS_UPLOADED(false)
       const files = fileDatas.value.map(fd => fd.data as File)
       await uploadImages(files, groupId.value)
       handleClose()
+      // 当前页面是上传分组页面时触发
+      if (parseInt(route.params.id as string) === groupId.value) {
+        store.actions.SET_IS_UPLOADED(true)
+      }
     }
 
-    const route = useRoute()
     watch(() => props.visible, (currentValue) => {
       if (currentValue) {
         handleShow()

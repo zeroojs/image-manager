@@ -126,19 +126,15 @@ export default defineComponent({
     text-align: center;
   }
   .button {
-    color: #fff;
+    color: var(--primary-color);
     padding: 10px 15px;
     border-radius: 6px;
     outline: none;
     border: unset;
     cursor: pointer;
-    background-color: #2c2c2c;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    &.text-button {
-      background-color: transparent;
-      box-shadow: none;
-      color: #6266f5;
-    }
+    background-color: initial;
+    font-size: 20px;
+    // box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
 }
 @media screen and (max-width: 768px) {

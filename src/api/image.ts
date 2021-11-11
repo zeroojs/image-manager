@@ -31,3 +31,18 @@ export const uploadImages = (files: File[], groupId: string | number) => {
 export const deleteImage = (id: number) => {
   return request.delete(`/image/${id}`)
 }
+
+// 批量删除照片
+export const batchDeleteImage = (ids: number[]) => {
+  return request.delete('/image', { data: { ids } })
+}
+
+// 下载图片
+export const downloadImageAction = (id: string | number, size = 'mini'): Promise<BlobPart> => {
+  return request.post('/image/download', { id, size }, {
+    responseType: 'blob',
+    // headers: {
+    //   'content-type': 'application/octet-stream'
+    // }
+  })
+}

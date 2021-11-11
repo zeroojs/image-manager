@@ -21,7 +21,8 @@ function cancelRequest(conf: AxiosRequestConfig) {
 }
 
 export const request: AxiosInstance = axios.create({
-  baseURL: 'http://localhost:3000',
+  // baseURL: 'http://localhost:3003',
+  baseURL: 'http://image-manager-api.zeroojs.com',
   timeout: 15000,
   headers: {
     // 'Content-Type': 'application/x-www-form-urlencoded' // charset=UTF-8
@@ -48,7 +49,10 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
   response => {
-    const { status } = response
+    const { status, request } = response
+    if (request.responseType === 'blob') {
+      return response.data
+    }
     if (status === 500) {
       const notify = useNotify()
       notify({

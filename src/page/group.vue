@@ -24,7 +24,7 @@
         :name="group.name"
         :count="group.count"
         :src="getGroupBanner(group)"
-        :layout="['select', 'edit', 'del', 'name']"
+        :layout="['edit', 'del', 'name']"
         @click="checkGroup(group)"
         @del="delGroup(group)"
       />

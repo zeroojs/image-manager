@@ -42,13 +42,6 @@ export default defineComponent({
 
     onMounted(() => {
       isCreated.value = true
-      // if (self.value) {
-      //   const selfHeight = self.value.clientHeight
-      //   const parentNode = self.value.parentNode
-      //   const cs = document.body.querySelectorAll('.notify-container')
-      //   height.value = selfHeight
-      //   console.log('cs', cs)
-      // }
       globalTimer = setTimeout(() => {
         handleClose()
         clearTimeout(globalTimer)
